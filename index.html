@@ -376,34 +376,43 @@
     
     // Schritt 5: Endergebnis abfragen
     function step5() {
-      const html = `
-        <h2>Schritt 5: Endergebnis</h2>
-        <p>Zum Schluss: Was ist ${minuend} - ${subtrahend}?</p>
-        <input type="number" id="inputStep5" placeholder="Deine Antwort"><br>
-        <button id="confirmStep5">Bestätigen</button>
-        <p id="feedbackStep5"></p>
-      `;
-      const stepDiv = appendStep(html);
-      const btn = stepDiv.querySelector("#confirmStep5");
-      btn.addEventListener("click", function() {
-        const answer = parseInt(stepDiv.querySelector("#inputStep5").value);
-        const feedback = stepDiv.querySelector("#feedbackStep5");
-        if(answer === finalResult) {
-          feedback.textContent = "Hurra 🎉, super gemacht! Party time!";
-          feedback.className = "success";
-        } else {
-          feedback.textContent = "Oh oh, das war leider falsch. Versuch es nochmal!";
-          feedback.className = "error";
-        }
+  const html = `
+    <h2>Schritt 5: Endergebnis</h2>
+    <p>Zum Schluss: Was ist ${minuend} - ${subtrahend}?</p>
+    <input type="number" id="inputStep5" placeholder="Deine Antwort"><br>
+    <button id="confirmStep5">Bestätigen</button>
+    <p id="feedbackStep5"></p>
+  `;
+  const stepDiv = appendStep(html);
+  const btn = stepDiv.querySelector("#confirmStep5");
+  const feedback = stepDiv.querySelector("#feedbackStep5");
 
-        // Button zum Neustarten hinzufügen (immer sichtbar nach Bestätigen)
-        const restartBtn = document.createElement("button");
-        restartBtn.textContent = "Neustarten";
-        restartBtn.style.marginLeft = "20px";
-        restartBtn.addEventListener("click", restart);
-        stepDiv.appendChild(restartBtn);
-      });
+  btn.addEventListener("click", function() {
+    const answer = parseInt(stepDiv.querySelector("#inputStep5").value);
+    
+    if(answer === finalResult) {
+      feedback.textContent = "Hurra 🎉, super gemacht! Party time!";
+      feedback.className = "success";
+    } else {
+      feedback.textContent = "Oh oh, das war leider falsch. Versuch es nochmal!";
+      feedback.className = "error";
     }
+
+    // Container für den Button anlegen
+    const restartContainer = document.createElement("div");
+    restartContainer.style.marginTop = "10px"; // etwas Abstand nach oben
+
+    const restartBtn = document.createElement("button");
+    restartBtn.textContent = "Neustarten";
+    restartBtn.addEventListener("click", restart);
+
+    // Button in den Container hängen
+    restartContainer.appendChild(restartBtn);
+    // Container unten an das stepDiv anhängen
+    stepDiv.appendChild(restartContainer);
+  });
+}
+
     
     // Programmstart
     step0();
