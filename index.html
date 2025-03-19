@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Der Subtraktor 🚜➖</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f8ff;
+    }
+    .step {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 2px solid #8fbc8f;
+      border-radius: 5px;
+      background-color: #ffffff;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    input[type="number"],
+    button {
+      padding: 5px;
+      font-size: 16px;
+      margin-bottom: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      cursor: pointer;
+    }
+    
+    /* Responsive Anpassungen für kleine Bildschirme */
+    @media (max-width: 600px) {
+      body {
+        margin: 10px;
+      }
+      .step {
+        padding: 10px;
+      }
+      input[type="number"],
+      button {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+    <h1>
+        <img src="traktor.webp" alt="Platzhalter" width="60" height="60">
+        Willkommen beim Subtraktor 🚜➖
+      </h1>
+  <div id="content"></div>
+  
+  <script>
+    // Globale Variablen
+    let minuend, subtrahend;
+    let tensB, result1, ones, roundNumber, subOnes, remainder, finalResult;
+    const contentDiv = document.getElementById("content");
+    
+    // Hilfsfunktion: Fügt einen neuen Schritt (Container) hinzu
+    function appendStep(html) {
+      const stepDiv = document.createElement("div");
+      stepDiv.className = "step";
+      stepDiv.innerHTML = html;
+      contentDiv.appendChild(stepDiv);
+      return stepDiv;
+    }
+
+    // Hilfsfunktion: Programm zurücksetzen und neu starten
+    function restart() {
+      // Inhalt leeren
+      contentDiv.innerHTML = "";
+      // Von vorne beginnen
+      step0();
+    }
+    
+    // Schritt 0: Zahlen eingeben
+    function step0() {
+      const html = `
+        <h2>Schritt 0: Zahlen eingeben</h2>
+        <p>Gib den ersten Wert ein (<b>Minuend</b>, von dem etwas abgezogen wird):</p>
+        <input type="number" id="inputMinuend"><br>
+        <p>Gib den zweiten Wert ein (<b>Subtrahend</b>, der abgezogen wird):</p>
+        <input type="number" id="inputSubtrahend"><br>
+        <button id="confirmStep0">Bestätigen</button>
+        <p id="feedbackStep0"></p>
+      `;
+      const stepDiv = appendStep(html);
+      const btn = stepDiv.querySelector("#confirmStep0");
+      btn.addEventListener("click", function() {
+        const val1 = stepDiv.querySelector("#inputMinuend").value;
+        const val2 = stepDiv.querySelector("#inputSubtrahend").value;
+        const feedback = stepDiv.querySelector("#feedbackStep0");
+        if(val1 === "" || val2 === "") {
+          feedback.textContent = "Bitte beide Zahlen eingeben!";
+          feedback.className = "error";
+        } else {
+          minuend = parseInt(val1);
+          subtrahend = parseInt(val2);
+          step1();
+        }
+      });
+    }
+    
+    // Schritt 1: Aufgabe bestätigen
+    function step1() {
+      const html = `
+        <h2>Schritt 1: Aufgabe bestätigen</h2>
+        <p>Du möchtest rechnen: ${minuend} - ${subtrahend}</p>
+        <button id="confirmStep1">Bestätigen</button>
+      `;
+      const stepDiv = appendStep(html);
+      const btn = stepDiv.querySelector("#confirmStep1");
+      btn.addEventListener("click", step2);
+    }
+    
+    // Schritt 2: Zehner-Rechnung (zwei Teil-Schritte)
+    function step2() {
+      // Ermittelten Zehnerwert (z. B. 10 bei 17) und Teil-Ergebnis
+      tensB = Math.floor(subtrahend / 10) * 10;
+      tensC = Math.floor(minuend / 10);
+      tensD = Math.floor(subtrahend / 10);
+      result1 = minuend - tensB;
+      sub1nes = minuend % 10;
+      
+      const html = `
+        <h2>Schritt 2: Zehner-Rechnung</h2>
+        <div id="step2a" style="border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+          <p>Wie lautet der Zehnerwert von ${subtrahend} (<b>Subtrahend</b>)? </p>
+          <input type="number" id="inputStep2a" placeholder="Deine Antwort"><br>
+          <button id="confirmStep2a">Bestätigen</button>
+          <p id="feedbackStep2a"></p>
+        </div>
+        <div id="step2b" style="display:none; border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+          <p>Berechne nun: ${minuend} - ${tensB} = ?</p>
+          <p><b>Pro-Tip:</b> Rechne einfach: ${tensC} - ${tensD} und hänge die ${sub1nes} vom <b>Minuend</b> einfach dran</p>
+          <input type="number" id="inputStep2b" placeholder="Deine Antwort"><br>
+          <button id="confirmStep2b">Bestätigen</button>
+          <p id="feedbackStep2b"></p>
+        </div>
+      `;
+      const stepDiv = appendStep(html);
+      
+      // Teil 2a: Abfrage des Zehnerwerts
+      const btnA = stepDiv.querySelector("#confirmStep2a");
+      btnA.addEventListener("click", function() {
+        const answerA = parseInt(stepDiv.querySelector("#inputStep2a").value);
+        const feedbackA = stepDiv.querySelector("#feedbackStep2a");
+        if(answerA === tensB) {
+          feedbackA.textContent = `Richtig! Der Zehnerwert ist ${tensB}.`;
+          feedbackA.className = "success";
+          // Nächsten Container einblenden
+          stepDiv.querySelector("#step2b").style.display = "block";
+        } else {
+          feedbackA.textContent = "Das stimmt nicht. Versuch es nochmal!";
+          feedbackA.className = "error";
+        }
+      });
+      
+      // Teil 2b: Subtrahiere den Zehnerwert vom Minuenden
+      const btnB = stepDiv.querySelector("#confirmStep2b");
+      btnB.addEventListener("click", function() {
+        const answerB = parseInt(stepDiv.querySelector("#inputStep2b").value);
+        const feedbackB = stepDiv.querySelector("#feedbackStep2b");
+        if(answerB === result1) {
+          feedbackB.textContent = `Prima! ${minuend} - ${tensB} = ${result1}`;
+          feedbackB.className = "success";
+          setTimeout(step3, 1500);
+        } else {
+          feedbackB.textContent = "Das stimmt nicht. Versuch es nochmal!";
+          feedbackB.className = "error";
+        }
+      });
+    }
+    
+    // Schritt 3: Einer-Rechnung (inklusive Teilschritte)
+    function step3() {
+      const minuendOnes = minuend % 10;
+      const subtrahendOnes = subtrahend % 10;
+      
+      // Kein Übertrag nötig, wenn der Einerwert des Minuenden größer oder gleich dem des Subtrahenden ist
+      if (minuendOnes >= subtrahendOnes) {
+        const html = `
+          <h2>Schritt 3: Einer-Rechnung (ohne Übertrag)</h2>
+          <div id="step3a" style="border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+            <p>Hinweis: Da der Einerwert des <b>Minuend</b> (${minuendOnes}) größer oder gleich dem des <b>Subtrahend</b> (${subtrahendOnes}) ist, kannst du den Einerwert des Subtrahend direkt abziehen.</p>
+            <p>Teilschritt 3.1: Wie hoch ist der Restwert des <b>Subtrahend</b>?</p>
+            <input type="number" id="inputStep3a" placeholder="Deine Antwort"><br>
+            <button id="confirmStep3a">Bestätigen</button>
+            <p id="feedbackStep3a"></p>
+          </div>
+          <div id="step3b" style="display:none; border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+            <p>Teilschritt 3.2: Berechne: ${minuendOnes} - ${subtrahendOnes} = ?</p>
+            <input type="number" id="inputStep3b" placeholder="Deine Antwort"><br>
+            <button id="confirmStep3b">Bestätigen</button>
+            <p id="feedbackStep3b"></p>
+          </div>
+          <div id="step3c" style="display:none; border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+            <p>Teilschritt 3.3: Addiere den Restwert des <b>Minuend</b> (also ${result1} - ${minuendOnes}) mit dem Ergebnis aus Schritt 3.2. Was ergibt das?</p>
+            <input type="number" id="inputStep3c" placeholder="Deine Antwort"><br>
+            <button id="confirmStep3c">Bestätigen</button>
+            <p id="feedbackStep3c"></p>
+          </div>
+        `;
+        const stepDiv = appendStep(html);
+        
+        // Teilschritt 3.1
+        const btn3a = stepDiv.querySelector("#confirmStep3a");
+        btn3a.addEventListener("click", function() {
+          const answerA = parseInt(stepDiv.querySelector("#inputStep3a").value);
+          const feedbackA = stepDiv.querySelector("#feedbackStep3a");
+          if (answerA === subtrahendOnes) {
+            feedbackA.textContent = `Richtig! Der Restwert des <b>Subtrahend</b> ist ${subtrahendOnes}.`;
+            feedbackA.className = "success";
+            stepDiv.querySelector("#step3b").style.display = "block";
+          } else {
+            feedbackA.textContent = "Das stimmt nicht. Versuch es nochmal!";
+            feedbackA.className = "error";
+          }
+        });
+        
+        // Teilschritt 3.2
+        const btn3b = stepDiv.querySelector("#confirmStep3b");
+        btn3b.addEventListener("click", function() {
+          const answerB = parseInt(stepDiv.querySelector("#inputStep3b").value);
+          const feedbackB = stepDiv.querySelector("#feedbackStep3b");
+          const diff = minuendOnes - subtrahendOnes;
+          if (answerB === diff) {
+            feedbackB.textContent = `Prima! ${minuendOnes} - ${subtrahendOnes} = ${diff}`;
+            feedbackB.className = "success";
+            // Nun Teilschritt 3.3 einblenden
+            stepDiv.querySelector("#step3c").style.display = "block";
+          } else {
+            feedbackB.textContent = "Das stimmt nicht. Versuch es nochmal!";
+            feedbackB.className = "error";
+          }
+        });
+        
+        // Teilschritt 3.3
+        const btn3c = stepDiv.querySelector("#confirmStep3c");
+        btn3c.addEventListener("click", function() {
+          const answerC = parseInt(stepDiv.querySelector("#inputStep3c").value);
+          const feedbackC = stepDiv.querySelector("#feedbackStep3c");
+          const restwertMinuend = result1 - minuendOnes;
+          const finalValue = restwertMinuend + (minuendOnes - subtrahendOnes);
+          if (answerC === finalValue) {
+            feedbackC.textContent = `Hurra 🎉, super gerechnet! ${restwertMinuend} + ${minuendOnes - subtrahendOnes} = ${finalValue}`;
+            feedbackC.className = "success";
+            // Jubel und Neustart anbieten
+            const restartBtn = document.createElement("button");
+            restartBtn.textContent = "Neustarten";
+            restartBtn.style.marginLeft = "20px";
+            restartBtn.addEventListener("click", restart);
+            stepDiv.appendChild(restartBtn);
+          } else {
+            feedbackC.textContent = "Das war leider falsch. Versuch es nochmal!";
+            feedbackC.className = "error";
+          }
+        });
+        
+      } else {
+        // Falls ein Übertrag nötig ist, verwende die alte Logik:
+        const ones = minuend % 10;
+        roundNumber = (minuend - Math.floor(subtrahend / 10) * 10) - ones;
+        const html = `
+          <h2>Schritt 3: Einer-Rechnung (mit Übertrag)</h2>
+          <div id="step3a" style="border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+            <p>Wie viel ziehst du ab, damit aus ${minuend - Math.floor(subtrahend / 10) * 10} eine glatte Zahl mit einer 0 am Ende wird?</p>
+            <input type="number" id="inputStep3a" placeholder="Deine Antwort"><br>
+            <button id="confirmStep3a">Bestätigen</button>
+            <p id="feedbackStep3a"></p>
+          </div>
+          <div id="step3b" style="display:none; border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+            <p>Was ist ${minuend - Math.floor(subtrahend / 10) * 10} - <span id="onesValue"></span>?</p>
+            <input type="number" id="inputStep3b" placeholder="Deine Antwort"><br>
+            <button id="confirmStep3b">Bestätigen</button>
+            <p id="feedbackStep3b"></p>
+          </div>
+        `;
+        const stepDiv = appendStep(html);
+        const btn3a = stepDiv.querySelector("#confirmStep3a");
+        btn3a.addEventListener("click", function() {
+          const answerA = parseInt(stepDiv.querySelector("#inputStep3a").value);
+          const feedbackA = stepDiv.querySelector("#feedbackStep3a");
+          if (answerA === ones) {
+            feedbackA.textContent = `Richtig! Du ziehst ${ones} ab.`;
+            feedbackA.className = "success";
+            stepDiv.querySelector("#step3b").style.display = "block";
+            stepDiv.querySelector("#onesValue").textContent = ones;
+          } else {
+            feedbackA.textContent = "Hmm, das passt nicht. Versuch es nochmal!";
+            feedbackA.className = "error";
+          }
+        });
+        const btn3b = stepDiv.querySelector("#confirmStep3b");
+        btn3b.addEventListener("click", function() {
+          const answerB = parseInt(stepDiv.querySelector("#inputStep3b").value);
+          const feedbackB = stepDiv.querySelector("#feedbackStep3b");
+          if (answerB === roundNumber) {
+            feedbackB.textContent = `Klasse! ${minuend - Math.floor(subtrahend / 10) * 10} - ${ones} = ${roundNumber}`;
+            feedbackB.className = "success";
+            setTimeout(step4, 1500);
+          } else {
+            feedbackB.textContent = "Das war leider falsch. Versuch es nochmal!";
+            feedbackB.className = "error";
+          }
+        });
+      }
+    }
+    
+    // Schritt 4: Restwert ermitteln und abziehen (zwei Teil-Schritte)
+    function step4() {
+      subOnes = subtrahend % 10;
+      remainder = subOnes - (minuend % 10);
+      finalResult = (result1 - (minuend % 10)) - remainder;
+      
+      const html = `
+        <h2>Schritt 4: Restwerte</h2>
+        <div id="step4a" style="border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+          <p>Die Einerstelle vom <b>Subtrahend</b> ist ${subOnes}.<br>
+             In Schritt 3 hast du ${minuend % 10} abgezogen.<br>
+             Was ist ${subOnes} - ${minuend % 10}?</p>
+          <input type="number" id="inputStep4a" placeholder="Deine Antwort"><br>
+          <button id="confirmStep4a">Bestätigen</button>
+          <p id="feedbackStep4a"></p>
+        </div>
+        <div id="step4b" style="display:none; border: 1px solid #8fbc8f; margin: 10px; padding: 10px;">
+          <p>Jetzt rechne: ${result1 - (minuend % 10)} - <span id="remainderValue"></span> = ?</p>
+          <input type="number" id="inputStep4b" placeholder="Deine Antwort"><br>
+          <button id="confirmStep4b">Bestätigen</button>
+          <p id="feedbackStep4b"></p>
+        </div>
+      `;
+      const stepDiv = appendStep(html);
+      
+      // Teil 4a: Restwert Subtrahenden
+      const btn4a = stepDiv.querySelector("#confirmStep4a");
+      btn4a.addEventListener("click", function() {
+        const answerA = parseInt(stepDiv.querySelector("#inputStep4a").value);
+        const feedbackA = stepDiv.querySelector("#feedbackStep4a");
+        if(answerA === remainder) {
+          feedbackA.textContent = `Super, ${subOnes} - ${minuend % 10} = ${remainder}`;
+          feedbackA.className = "success";
+          // Nächsten Container einblenden
+          stepDiv.querySelector("#step4b").style.display = "block";
+          stepDiv.querySelector("#remainderValue").textContent = remainder;
+        } else {
+          feedbackA.textContent = "Das passt nicht. Versuch es nochmal!";
+          feedbackA.className = "error";
+        }
+      });
+      
+      // Teil 4b: finalResult = (result1 - (minuend % 10)) - remainder
+      const btn4b = stepDiv.querySelector("#confirmStep4b");
+      btn4b.addEventListener("click", function() {
+        const answerB = parseInt(stepDiv.querySelector("#inputStep4b").value);
+        const feedbackB = stepDiv.querySelector("#feedbackStep4b");
+        if(answerB === finalResult) {
+          feedbackB.textContent = `Klasse, ${result1 - (minuend % 10)} - ${remainder} = ${finalResult}`;
+          feedbackB.className = "success";
+          setTimeout(step5, 1500);
+        } else {
+          feedbackB.textContent = "Das stimmt nicht. Versuch es nochmal!";
+          feedbackB.className = "error";
+        }
+      });
+    }
+    
+    // Schritt 5: Endergebnis abfragen
+    function step5() {
+      const html = `
+        <h2>Schritt 5: Endergebnis</h2>
+        <p>Zum Schluss: Was ist ${minuend} - ${subtrahend}?</p>
+        <input type="number" id="inputStep5" placeholder="Deine Antwort"><br>
+        <button id="confirmStep5">Bestätigen</button>
+        <p id="feedbackStep5"></p>
+      `;
+      const stepDiv = appendStep(html);
+      const btn = stepDiv.querySelector("#confirmStep5");
+      btn.addEventListener("click", function() {
+        const answer = parseInt(stepDiv.querySelector("#inputStep5").value);
+        const feedback = stepDiv.querySelector("#feedbackStep5");
+        if(answer === finalResult) {
+          feedback.textContent = "Hurra 🎉, super gemacht! Party time!";
+          feedback.className = "success";
+        } else {
+          feedback.textContent = "Oh oh, das war leider falsch. Versuch es nochmal!";
+          feedback.className = "error";
+        }
+
+        // Button zum Neustarten hinzufügen (immer sichtbar nach Bestätigen)
+        const restartBtn = document.createElement("button");
+        restartBtn.textContent = "Neustarten";
+        restartBtn.style.marginLeft = "20px";
+        restartBtn.addEventListener("click", restart);
+        stepDiv.appendChild(restartBtn);
+      });
+    }
+    
+    // Programmstart
+    step0();
+  </script>
+</body>
+</html>
